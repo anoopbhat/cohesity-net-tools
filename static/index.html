@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="shortcut icon" href="favicon.ico">
+<title>Cohesity Network Tools</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<script type="text/javascript" src="script.js"></script>
+</head>
+<body>
+<div class="header">
+<img class="logo" src="CohesityLogo-Black.svg" alt="Cohesity Logo"> NETWORK TOOLS
+</div>
+<div class="topnav">
+  <div class="tablinks" onclick="showTask(event, 'Ping', 'pingHost')" id="defaultOpen" on>Ping</div>
+  <div class="tablinks" onclick="showTask(event, 'PortTest', 'Host')">Port Test</div>
+  <div class="tablinks" onclick="showTask(event, 'DNS', 'fqdn')">DNS Lookup</div>
+  <div class="tablinks" onclick="showTask(event, 'SSH', 'sshHost')">SSH</div>
+  <div class="tablinks" onclick="showTask(event, 'Traceroute', 'traceHost')">Traceroute</div>
+
+<!-- a down the road thing. Shell.
+  <div class="tablinks" style="float: right;" onclick="showTask(event, 'shell', 'shell')">>$_</div>
+  <div class="tablinks" style="float: right;" onclick="showTask(event, 'help', 'help')">?</div>
+-->
+</div>
+
+<div id="Ping" class="tabcontent">
+  <p>
+      <input class="inputs" type="text" name="pingHost" placeholder="IP Address">
+      <br><br><br>
+      <button class="buttons" type="button" onclick="goPing('pingHost')">Ping</button>
+  </p>
+</div>
+
+<div id="PortTest" class="tabcontent">
+  <p>
+      <input class="inputs" type="text" name="Host" placeholder="Host">&nbsp;&nbsp;
+      <input class="inputs" style="width: 70px;" type="text" name="Portnum" placeholder="Port">
+      <br><br><br>
+      <button class="buttons" type="button" onclick="goPortTest('Host', 'Portnum')">Test</button>
+  </p> 
+</div>
+
+<div id="DNS" class="tabcontent">
+  <p>
+      <input class="inputs" type="text" name="fqdn" placeholder="FQDN">
+      <br><br><br>
+      <button class="buttons" type="button" onclick="goDNSTest('fqdn')">Lookup</button>
+  </p>
+</div>
+
+<div id="SSH" class="tabcontent">
+  <p>
+      <input class="inputs" type="text" name="sshHost" placeholder="IP or Hostname*">
+      <input class="inputs" type="text" name="sshUser" placeholder="username*">
+      <input class="inputs" type="password" name="sshPass" placeholder="password">
+      <br><br>
+      <textarea class="inputs sshprivatekey" type="textarea" name="sshPrivKey" placeholder="private key" rows="4"></textarea>
+      <br><sup>Private key and passwords are not stored anywhere on disk.</sup>
+
+      <br><br><br>
+      <button class="buttons" type="button" onclick="goSSHTest('sshHost', 'sshUser', 'sshPass', 'sshPrivKey')">Test</button>
+  </p>
+</div>
+
+
+<div id="Traceroute" class="tabcontent">
+  <p>
+      <input class="inputs" type="text" name="traceHost" placeholder="IP or Hostname to trace">
+      <br><br><br>
+      <button class="buttons" type="button" onclick="goTraceHost('traceHost')">Trace</button>
+  </p>
+</div>
+
+<!-- Results This is populated dynamically-->
+<div id="results" class="results"></div>
+	<br><br>
+<div id="resultsControl" style="padding: 0px 100px; display: none; magin: auto; text-align: center;">
+	<button onClick="document.getElementById('results').innerHTML=''" type="button" class="buttons">Clear</button>
+	<button onClick="document.getElementById('resultsControl').style.display='none'; document.getElementById('results').style.display='none';" type="button" class="buttons">Close</button>
+</div>
+<div id="responseText" style="display: none"></div>
+
+<script>
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
+
+</body>
+</html>
+
