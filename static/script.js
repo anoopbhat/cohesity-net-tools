@@ -77,7 +77,8 @@ function makeAJAXCall(endpoint, data) {
 	var params = data;
 	http.open('POST', url, false)
 
-	console.log(url + " " + params);
+	console.log("AJAX URL: " + url);
+	console.log("Params are not logged for security reasons.");
 	
 	//Send the proper header information along with the request
 	http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -230,15 +231,22 @@ function goSSHTest(sshHost, sshUser, sshPass, sshPrivKey) {
 		return;
 	}
 
+	// no  port is provided. Add :22 to the  value.
+	if ( sshHostValue.indexOf(':') < 0 ) {
+		console.log("no port included. Adding :22");
+		sshHostValue += ":22"
+	}
+
 	params = "host=" + sshHostValue + "&user=" + sshUserValue
 
 	if ( sshPassValue != "" ) {
+	    console.log ("Using password method.");
 	    params += "&password=" + sshPassValue;
 	} else {
+	    console.log("Using private key method. Private key is not stored anywhere.");
 	    params += "&sshPrivKey=" + sshPrivKeyValue;
 	}
 
-	console.log("Params: " + params);
 	makeAJAXCall('/ssh', params);
 
 	console.log(document.getElementById("responseText").innerHTML);
@@ -246,7 +254,8 @@ function goSSHTest(sshHost, sshUser, sshPass, sshPrivKey) {
 
 	printResult("SSH " + sshUserValue + "@" + sshHostValue + " - " + sshResult);
 
-
+	delete sshPrivKeyValue;
+	delete sshPassValue;
 }
 
 function goTraceHost(traceHost) {

@@ -25,6 +25,8 @@ Another todo here is to maybe lookup reverses as well or automatically do revers
 This section may expand in the future to allow for other record types like CNAME, MX, TXT, PTR SRV and so on.
 
 ## SSH
+The hostname field asks for a port but the default port, 22, is assumed if no value is provided.
+
 As of version 1.0 of Cohesity-net-tools, we only test password authentication but keybased auth is the next most important feature to be added.
 
 Additionally, the command that's run by default is "/usr/bin/id" and we should probably allow more options in the future.
