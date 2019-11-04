@@ -38,7 +38,7 @@ function printResult(message) {
                 resultDiv.style.boxShadow="0 0 20px 1px rgba(0,0,0,.1)";
         }   
 
-        resultDiv.innerHTML = "<div class='resultTime'>" + dateTime + "</div> " + message + "<br>" + resultDiv.innerHTML;
+        resultDiv.innerHTML = "<div class='row'><div class='resultTime'>" + dateTime + "</div> " + message + "</div>" + resultDiv.innerHTML;
 
 }
 
@@ -91,9 +91,31 @@ function makeAJAXCall(endpoint, data) {
 	http.send(params);
 }
 
+function toggleLoader() {
+
+    loader = document.getElementById("loader");
+
+    if ( loader.style.display == "" ) {
+	loaderStyle = document.defaultView.getComputedStyle(loader);
+	loader.style.display = loaderStyle["display"];
+	console.log("setting loader style display to: " + loaderStyle["display"]);
+    }
+
+    if ( loader.style.display == "none" ) {
+	console.log("Turning loader on.");
+	loader.style.display = "block";
+    } else {
+	console.log("Turning loader off.");
+	loader.style.display = "none";
+    }
+}
+
 // function executed when Ping button is pressed
 // todo: validate the input that we receive from the field. ensure it's IP or fqdn.
 function goPing(host) {
+
+	// show the laoder
+	//toggleLoader();
 
 	// trim whitespace off the ends snd get value
 	hostValue = document.getElementsByName(host)[0].value.trim();
@@ -113,12 +135,15 @@ function goPing(host) {
 	params = "pingHost=" + hostValue;
 
 	makeAJAXCall('/ping', params);
+	//toggleLoader();
 
 	// log the value in the responseText element
 	console.log(document.getElementById("responseText").innerHTML);
 	pingResult = document.getElementById("responseText").innerHTML;
 
 	printResult("PING " + pingResult);
+
+	// hide the loader
 }
 
 // functon exxecuted when Port test button is pressed
@@ -205,7 +230,21 @@ function goSSHTest(sshHost, sshUser, sshPass, sshPrivKey) {
 		return;
 	}
 
-	printResult(sshHostValue + " " + sshUserValue);
+	params = "host=" + sshHostValue + "&user=" + sshUserValue
+
+	if ( sshPassValue != "" ) {
+	    params += "&password=" + sshPassValue;
+	} else {
+	    params += "&sshPrivKey=" + sshPrivKeyValue;
+	}
+
+	console.log("Params: " + params);
+	makeAJAXCall('/ssh', params);
+
+	console.log(document.getElementById("responseText").innerHTML);
+	sshResult = document.getElementById("responseText").innerHTML;
+
+	printResult("SSH " + sshUserValue + "@" + sshHostValue + " - " + sshResult);
 
 
 }

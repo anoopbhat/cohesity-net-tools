@@ -9,6 +9,9 @@ import (
     "time"
     "net"
     "strings"
+    "bytes"
+
+    "golang.org/x/crypto/ssh"
 )
 
 func main() {
@@ -58,15 +61,15 @@ func main() {
 
 	connStr := net.JoinHostPort(host, port);
 
-	dialer := net.Dialer{Timeout: 10 * time.Second}
+	dialer := net.Dialer{Timeout: 3 * time.Second}
 
 	conn, err := dialer.Dial("tcp", connStr)
 		if err != nil {
-			panic(err)
+		    io.WriteString(w,err.Error())
 		} else {
+		    io.WriteString(w, "Connected to " +  connStr);
 		    defer conn.Close()
 		}
-	io.WriteString(w, "Connected to " +  connStr);
     }
 
 
@@ -82,7 +85,7 @@ func main() {
 	fqdn := r.FormValue("fqdn")
 
 	IPs, err := net.LookupIP(fqdn)
-   
+
 	    if err != nil {
 		panic(err)
 	    }
@@ -99,10 +102,68 @@ func main() {
 	io.WriteString(w,  "IPs: " +  strIPs);
     }
 
+    // function to handle ssh'ing into a host
+    sshFunc := func(w http.ResponseWriter, r *http.Request) {
+
+	if err := r.ParseForm(); err != nil {
+	    log.Println(w, "ParseForm() err: %v", err)
+	    return
+	}
+
+	host := r.FormValue("host")
+	user := r.FormValue("user")
+	pass := r.FormValue("password")
+	/*pemkey := r.FormValue("sshPrivKey")
+
+	key, err := ssh.ParsePrivateKey([]byte(pemkey))
+
+	if err != nil {
+	    panic(err)
+	}*/
+
+	// setup the client configuration
+	config := &ssh.ClientConfig{
+	    User: user,
+	    Auth: []ssh.AuthMethod{
+	    ssh.Password(pass),
+	    },
+
+	    // need this apparently. no idea why. see https://github.com/golang/go/issues/19767
+	    HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+		return nil
+	    },
+	}
+
+	// connect to the host
+	client, err := ssh.Dial("tcp", host, config) 
+
+	if err != nil {
+	    panic(err)
+	}
+
+	// establish a session
+	session, err := client.NewSession()
+
+	if err != nil {
+	    panic(err)
+	}
+
+	defer session.Close()
+
+	var b bytes.Buffer
+
+	session.Stdout = &b
+	if err := session.Run("/usr/bin/id"); err != nil {
+	    panic("Failed to run: " + err.Error())
+	}
+
+	io.WriteString(w, "/usr/bin/id output: " + b.String())
+    }
+
     http.HandleFunc("/ping", pingFunc)
     http.HandleFunc("/port", portTestFunc)
     http.HandleFunc("/dns", DNSLookupFunc)
-//    http.HandleFunc("/ssh", sshFunc)
+    http.HandleFunc("/ssh", sshFunc)
 //    http.HandleFunc("/trace", traceFunc)
 
 

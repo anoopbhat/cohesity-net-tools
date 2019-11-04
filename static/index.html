@@ -51,11 +51,11 @@
 
 <div id="SSH" class="tabcontent">
   <p>
-      <input class="inputs" type="text" name="sshHost" placeholder="IP or Hostname*">
+      <input class="inputs" type="text" name="sshHost" placeholder="IP or Hostname:port*">
       <input class="inputs" type="text" name="sshUser" placeholder="username*">
       <input class="inputs" type="password" name="sshPass" placeholder="password">
       <br><br>
-      <textarea class="inputs sshprivatekey" type="textarea" name="sshPrivKey" placeholder="private key" rows="4"></textarea>
+      <textarea class="inputs sshprivatekey" type="textarea" name="sshPrivKey" placeholder="private key" rows="2"></textarea>
       <br><sup>Private key and passwords are not stored anywhere on disk.</sup>
 
       <br><br><br>
@@ -72,6 +72,7 @@
   </p>
 </div>
 
+<!--<div class="loader" id="loader"></div>-->
 <!-- Results This is populated dynamically-->
 <div id="results" class="results"></div>
 	<br><br>
