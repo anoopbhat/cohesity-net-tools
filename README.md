@@ -10,6 +10,12 @@ This web app tries to use native implementations of tools wherever possible so t
 Count is 3.
 Timeout is 5s.
 
+On linux, you might have to provide a privilege for ping to work.
+
+You can do this with
+
+sudo sysctl -w net.ipv4.ping_group_range="0   2147483647"
+
 ## Port Test
 Timeout is 3s.
 
