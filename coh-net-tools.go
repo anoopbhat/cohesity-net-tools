@@ -172,7 +172,6 @@ func main() {
 
 	// format the message in HTML for display. 
 	// in the future, we might want to sent his data in json
-	traceMessage += "Testing synchronous traceroute<br>"
 
 	out, err := traceroute.Traceroute(tracehost, new(traceroute.TracerouteOptions));
 
@@ -279,8 +278,20 @@ mgr8v3UU92cGLWY8AU3WHRaw6jaOaBOxOm7NHe320hhYggdX6Oha
 // print out each hop and send it back
 func printHop(hop traceroute.TracerouteHop) string {
 
-	 s := fmt.Sprintf("%v.%v.%v.%v", hop.Address[0], hop.Address[1], hop.Address[2], hop.Address[3])
+	addr := fmt.Sprintf("%v.%v.%v.%v", hop.Address[0], hop.Address[1], hop.Address[2], hop.Address[3])
 
-	return s
+	line := ""
+
+	hostOrAddr := addr
+
+	if hop.Host != "" {
+		hostOrAddr = hop.Host
+	}
+	if hop.Success {
+		line += fmt.Sprintf("%-3d %v (%v)  %v\n", hop.TTL, hostOrAddr, addr, hop.ElapsedTime)
+	} else {
+		line += fmt.Sprintf("%-3d *\n", hop.TTL)
+	}
+
+	return line
 }
-
