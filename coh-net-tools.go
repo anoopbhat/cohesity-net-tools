@@ -89,7 +89,8 @@ func main() {
 	IPs, err := net.LookupIP(fqdn)
 
 	    if err != nil {
-		panic(err)
+		io.WriteString(w, "Error: " + err.Error())
+		return;
 	    }
 
 	// convert each IP, a slice, in IPs which is also a slice. it's a slice of slices.
@@ -134,14 +135,18 @@ func main() {
 	client, err := ssh.Dial("tcp", host, config) 
 
 	if err != nil {
-	    panic(err)
+	    io.WriteString(w, "Error: " + err.Error())
+	    return
+	    log.Println(err)
 	}
 
 	// establish a session
 	session, err := client.NewSession()
 
 	if err != nil {
-	    panic(err)
+	    io.WriteString(w, err.Error())
+	    //panic(err)
+	    return
 	}
 
 	defer session.Close()
@@ -150,7 +155,9 @@ func main() {
 
 	session.Stdout = &b
 	if err := session.Run("/usr/bin/id"); err != nil {
-	    panic("Failed to run: " + err.Error())
+	    io.WriteString(w, "Failed to run: "  + err.Error())
+	    //panic("Failed to run: " + err.Error())
+	    return
 	}
 
 	io.WriteString(w, "/usr/bin/id output: " + b.String())
@@ -270,6 +277,7 @@ mgr8v3UU92cGLWY8AU3WHRaw6jaOaBOxOm7NHe320hhYggdX6Oha
         HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
             return nil
         },
+	Timeout: 5 * time.Second,
     }
 
     return config
