@@ -17,6 +17,8 @@
   <div class="tablinks" onclick="showTask(event, 'DNS', 'fqdn')">DNS Lookup</div>
   <div class="tablinks" onclick="showTask(event, 'SSH', 'sshHost')">SSH</div>
   <div class="tablinks" onclick="showTask(event, 'Traceroute', 'traceHost')">Traceroute</div>
+  <div class="tablinks" onclick="showTask(event, 'NTP', 'ntphost')">NTP</div>
+  <div class="tablicks" onclick="showTask(event, 'Netapp', 'netappctrl')">Netapp</div>
 
 <!-- a down the road thing. Shell.
   <div class="tablinks" style="float: right;" onclick="showTask(event, 'shell', 'shell')">>$_</div>
@@ -53,13 +55,21 @@
   <p>
       <input class="inputs" type="text" name="sshHost" placeholder="IP or Hostname:port*">
       <input class="inputs" type="text" name="sshUser" placeholder="username*">
-      <input class="inputs" type="password" name="sshPass" placeholder="password">
-      <br><br>
-      <textarea class="inputs sshprivatekey" type="textarea" name="sshPrivKey" placeholder="private key" rows="2"></textarea>
-      <br><sup>Private key and passwords are not stored anywhere on disk.</sup>
+      <input class="inputs" type="password" name="sshPass" placeholder="password"><br><br><br>
 
-      <br><br><br>
-      <button class="buttons" type="button" onclick="goSSHTest('sshHost', 'sshUser', 'sshPass', 'sshPrivKey')">Test</button>
+<label class="container">
+  <input type="checkbox" id="keycheckbox" onclick="showPubKey()">
+  <span class="checkmark"></span>
+</label><br>
+<div style="font-size: 1.5em; color: rgb(75, 75, 75);">Key Based Authentication</div><br>
+      <textarea spellcheck="false" class="inputs sshprivatekey" type="textarea" style="display: none; border: none;" name="sshPubKey" rows="9" cols="65" disabled>
+Add this public key to the authorized_keys file on the target host
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQFrJIyKfnKHX999RqU78DIwpfc5ImgqMZr733lSKy+ukQOW5DKy/cv7q5hgWaKYEobVKCsI/N8kurD4P/g0ve4AjTsOypaMSE1lWI9lO48jmZN/GKSP8IF6E5RFsws63YbQpXEzKkhW0afO4uFwX5eXPbLwkaNpKuie4WCwEu+g638FSwBwdTy+0M0V1uws5zNJ0URA5DH9a5XIGMpc7LE5T0Y4lpR+x0+VbR/hmdd64JMScyHVRpwxXzSR4Zp8JocW/ibp0IfiI0VlhASHSFqfm279UcHdgcWQMPJzyYRNaXKfXmVo2sZ17zA/wwfG6emK1lm3ZtduH4cqVSWozj coh-net-tools@COHESITYCLUSTER
+</textarea>
+      <br><br>
+
+      <button class="buttons" type="button" onclick="goSSHTest('sshHost', 'sshUser', 'sshPass', 'keycheckbox')">Test</button>
   </p>
 </div>
 
@@ -72,7 +82,22 @@
   </p>
 </div>
 
-<!--<div class="loader" id="loader"></div>-->
+<div id="NTP" class="tabcontent">
+  <p>
+      <input class="inputs" type="text" name="ntphost" placeholder="IP or Hostname to query">
+      <br><br><br>
+      <button class="buttons" type="button" onclick="goNTPQuery('ntphost')">Query</button>
+  </p>
+</div>
+
+<div id="Netapp" class="tabcontent">
+  <p>
+      <input class="inputs" type="text" name="netappctrl" placeholder="IP or Hostname to trace">
+      <br><br><br>
+      <button class="buttons" type="button" onclick="goTraceHost('traceHost')">Trace</button>
+  </p>
+</div>
+
 <!-- Results This is populated dynamically-->
 <div id="results" class="results"></div>
 	<br><br>

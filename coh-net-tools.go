@@ -110,28 +110,22 @@ func main() {
 	    return
 	}
 
+	log.Println(r)
+
 	host := r.FormValue("host")
 	user := r.FormValue("user")
 	pass := r.FormValue("password")
-	/*pemkey := r.FormValue("sshPrivKey")
+	keyauth := r.FormValue("keyauth");
 
-	key, err := ssh.ParsePrivateKey([]byte(pemkey))
+	config := &ssh.ClientConfig{}
 
-	if err != nil {
-	    panic(err)
-	}*/
-
-	// setup the client configuration
-	config := &ssh.ClientConfig{
-	    User: user,
-	    Auth: []ssh.AuthMethod{
-	    ssh.Password(pass),
-	    },
-
-	    // need this apparently. no idea why. see https://github.com/golang/go/issues/19767
-	    HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-		return nil
-	    },
+	// if keyauth is set to true. always use keyauth.
+	if keyauth == "true"  {
+	    log.Println("Setting up SSH with Key Based Authenticaion")
+	    config = setupSSHConfigWithKey(user)
+	} else {
+	    log.Println("Segtting up SSH with password based authentication.")
+	    config = setupSSHConfigWithPass(user, pass)
 	}
 
 	// connect to the host
@@ -169,4 +163,76 @@ func main() {
 
     log.Println("Listening...")
     log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+// return an ssh config using password as the auth method
+func setupSSHConfigWithPass(user string, pass string) *ssh.ClientConfig {
+
+    config := &ssh.ClientConfig{
+	User: user,
+        Auth: []ssh.AuthMethod{
+	    ssh.Password(pass),
+	},
+
+    // need this apparently. no idea why. see https://github.com/golang/go/issues/19767
+        HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+            return nil
+        },
+    }
+
+    return config
+}
+
+// setup an ssh config using private key as the auth method
+func setupSSHConfigWithKey(user string) *ssh.ClientConfig {
+
+    // the private key
+    pkey_bytes := []byte(`-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEA0BaySMin5yh1/ffUalO/AyMKX3OSJoKjGa+995UisvrpEDlu
+Qysv3L+6uYYFmimBKG1SgrCPzfJLqw+D/4NL3uAI07DsqWjEhNZViPZTuPI5mTfx
+ikj/CBehOURbMLOt2G0KVxMypIVtGnzuLhcF+Xlz2y8JGjaSronuFgsBLvoOt/BU
+sAcHU8vtDNFdbsLOczSdFEQOQx/WuVyBjKXOyxOU9GOJaUfsdPlW0f4ZnXeuCTEn
+Mh1UacMV80keGafCaHFv4m6dCH4iNFZYQEh0han5tu/VHB3YHFkDDyc8mETWlyn1
+5laNrGde8wP8MHxunpitZZt2bXbh+HKlUlqM4wIDAQABAoIBAQCKhLFFdh0e6XYy
+C4mhBgJ/KhI7nAlMDWZZMP26E9K3ZgNDQ5e8qsD/p7m6yhZsmvhZWvyz9qijpYjt
+ZDSwIEyfHm+By6Ke2xkGfE8QDzmIQeZJsk3did4LGv+9yV0SvGkbSuq5MBRkJFWO
+bl922uilO03+N/9NLcrS2QpeLhEpnSOQMc8eZkapuhN1TkNlTKtbsecZzPVAgM/h
+9omqvmito3Ktj0V9T7/HPU/LdcjgEawN4R+ZxxGRwTf31CKoufXPDvQIclrV7ps0
+tQFv5vcZ33doVwrVKsrMbYoRYdJdQ3NGf8eU8wwwZzEyFdKWtbt5CG+jyeeIbjJC
+9cs5m4hhAoGBAPimXckNXFMukuErM+KfsUz35+iss86PTXQ3ag+8LLd6MMRAVE+g
+tmcoC9O48NAAtrLpZM0mBLfQncya2J4opUEtHr2ibuXhVukkqmXKpHjMwZOvADVs
+saMEOFXehMXs4JtBxb7T2XwjOarI/q7Rf9iLsH4Efg6MUPiRJIZVAObbAoGBANY9
+YxavCkzGDOBeDgxo5LGD9Beim4hmLN42qElFMDOQhLyU7IENsttMB4loSPC2SdXL
+U5QQulzdwxqPJBJAJ5B4kcKCDyoVRUi+pO2VbmzsixzDdwE5EOyO0CPuPnkptV9F
+FXQbhYwKa5o4Rizw5mRj7wX2FYjqKbvQS9HXA/yZAoGAHt9BG7pd8TICKJTdn1Cm
+ieDp2VjABnCCdGCA+a0qfClerq8yCKTyoMI3HbWDqL+9717NFi+XPF9ZiFLdfF2d
+jwcUHwVw8XfV+6KCyZqsaxc5HaYHx5pUP+JBQGAdahmsFXrIG5ZgFWqmOU81V+1J
+C1Dku/DA2fuP/hy/RTJ+pysCgYAfvEAtYAh6juvhYI1cMT2PPiiuR5wafGgxEo+j
+KuiU+tdux/CwvUK9UWncZOJJJfeR/+iFimTQ1NjN2l5RhcdWk0WkNnfgl/4HZJYx
+y2zsHa4NuLasK7PiFtWmPOhsMk13q1geNuV1dSWzVpqulZDLVjJWA7n06hr8g0J3
+9w3UIQKBgH1PcYSGmRK8wPEPTtUuOO1nf3Xey+BYvPmYcJ2GRg0EpxRyKQrUIe8h
+RQeS/3jMBksUEN+qawGsFkaesCu4axjDWKwOkH/Y/ExNiGgS6Wfo7WJueXVEZdF+
+mgr8v3UU92cGLWY8AU3WHRaw6jaOaBOxOm7NHe320hhYggdX6Oha
+-----END RSA PRIVATE KEY-----`)
+
+    // parse the key
+    signer, err := ssh.ParsePrivateKey(pkey_bytes)
+
+	if err != nil {
+	    panic(err)
+        }
+
+    config := &ssh.ClientConfig{
+	User: user,
+        Auth: []ssh.AuthMethod{
+	    ssh.PublicKeys(signer),
+	},
+
+    // need this apparently. no idea why. see https://github.com/golang/go/issues/19767
+        HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+            return nil
+        },
+    }
+
+    return config
 }

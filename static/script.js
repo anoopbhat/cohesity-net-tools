@@ -78,7 +78,8 @@ function makeAJAXCall(endpoint, data) {
 	http.open('POST', url, false)
 
 	console.log("AJAX URL: " + url);
-	console.log("Params are not logged for security reasons.");
+	console.log("params: " + params)
+
 	
 	//Send the proper header information along with the request
 	http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -212,13 +213,13 @@ function goDNSTest(fqdn) {
 
 }
 // function executed when ssh test button is pressed
-function goSSHTest(sshHost, sshUser, sshPass, sshPrivKey) {
+function goSSHTest(sshHost, sshUser, sshPass, cbcheckbox) {
 
 	// take whitespace off the ends and get value
 	sshHostValue = document.getElementsByName(sshHost)[0].value.trim();
 	sshUserValue = document.getElementsByName(sshUser)[0].value.trim();
 	sshPassValue = document.getElementsByName(sshPass)[0].value.trim();
-	sshPrivKeyValue = document.getElementsByName(sshPrivKey)[0].value.trim();
+	cb = document.getElementById(cbcheckbox);
 
 	// validate the input
 	if ( sshHostValue == "" || sshUserValue == "" ) {
@@ -226,8 +227,8 @@ function goSSHTest(sshHost, sshUser, sshPass, sshPrivKey) {
 		return;
 	}
 
-	if ( sshPassValue == "" && sshPrivKeyValue == "" ) {
-		printResult("Password or private key must be provided. Private keys and passwords are not stored on disk.");
+	if ( sshPassValue == "" && cb.checked == false ) {
+		printResult("Please provide a password or check the box to use key based authentication");
 		return;
 	}
 
@@ -240,11 +241,13 @@ function goSSHTest(sshHost, sshUser, sshPass, sshPrivKey) {
 	params = "host=" + sshHostValue + "&user=" + sshUserValue
 
 	if ( sshPassValue != "" ) {
+	    auth = "Password";
 	    console.log ("Using password method.");
 	    params += "&password=" + sshPassValue;
 	} else {
-	    console.log("Using private key method. Private key is not stored anywhere.");
-	    params += "&sshPrivKey=" + sshPrivKeyValue;
+	    auth = "Key";
+	    console.log("Using public key authentication.");
+	    params += "&keyauth=true";
 	}
 
 	makeAJAXCall('/ssh', params);
@@ -252,9 +255,8 @@ function goSSHTest(sshHost, sshUser, sshPass, sshPrivKey) {
 	console.log(document.getElementById("responseText").innerHTML);
 	sshResult = document.getElementById("responseText").innerHTML;
 
-	printResult("SSH " + sshUserValue + "@" + sshHostValue + " - " + sshResult);
+	printResult("SSH " + sshUserValue + "@" + sshHostValue + " using " + auth + " - " + sshResult);
 
-	delete sshPrivKeyValue;
 	delete sshPassValue;
 }
 
@@ -275,6 +277,33 @@ function goTraceHost(traceHost) {
 
 	printResult(traceHostValue);
 
+}
+
+// disable the password field and show the public key
+function showPubKey() {
+
+    cb = document.getElementById("keycheckbox");
+
+    passField = document.getElementsByName("sshPass")[0]
+    pubkey = document.getElementsByName("sshPubKey")[0];
+
+    if ( cb.checked ) {    
+   
+	// disable the password field 
+	passField.value = "";
+	passField.disabled = true;
+	passField.placeholder = "";
+
+	pubkey.style.display = "block";
+	pubkey.style.margin = "auto";
+
+    } else {
+	
+	passField.disabled = false;
+	passField.placeholder = "password";
+    
+	pubkey.style.display = "none";
+    }
 }
 	
 
