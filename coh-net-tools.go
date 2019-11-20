@@ -5,13 +5,15 @@ import (
     "io"
     "log"
     "net/http"
-    "github.com/sparrc/go-ping"
     "time"
     "net"
     "strings"
     "bytes"
 
+    "github.com/sparrc/go-ping"
+    "github.com/aeden/traceroute"
     "golang.org/x/crypto/ssh"
+    
 )
 
 func main() {
@@ -154,11 +156,48 @@ func main() {
 	io.WriteString(w, "/usr/bin/id output: " + b.String())
     }
 
+    // function to handle traceroute
+    traceFunc := func(w http.ResponseWriter, r *http.Request) {
+
+	// here we'll do the traceroute and send that back to the user
+
+        if err := r.ParseForm(); err != nil {
+            log.Println(w, "ParseForm() err: %v", err)
+            return
+        }
+
+        tracehost := r.FormValue("tracehost")
+
+	traceMessage := ""
+
+	// format the message in HTML for display. 
+	// in the future, we might want to sent his data in json
+	traceMessage += "Testing synchronous traceroute<br>"
+
+	out, err := traceroute.Traceroute(tracehost, new(traceroute.TracerouteOptions));
+
+	if err == nil {
+		if len(out.Hops) == 0 {
+			traceMessage += "Traceroute failed. Expected at least one hop<br>"
+		}
+	} else {
+		traceMessage += "Traceroute failed due to an error: " + err.Error()
+	}
+
+	for _, hop := range out.Hops {
+		traceMessage += printHop(hop) + "<br>"
+	}
+
+	io.WriteString(w, traceMessage)
+
+    }
+
+    // handlers for all the requests
     http.HandleFunc("/ping", pingFunc)
     http.HandleFunc("/port", portTestFunc)
     http.HandleFunc("/dns", DNSLookupFunc)
     http.HandleFunc("/ssh", sshFunc)
-//    http.HandleFunc("/trace", traceFunc)
+    http.HandleFunc("/trace", traceFunc)
 
 
     log.Println("Listening...")
@@ -236,3 +275,12 @@ mgr8v3UU92cGLWY8AU3WHRaw6jaOaBOxOm7NHe320hhYggdX6Oha
 
     return config
 }
+
+// print out each hop and send it back
+func printHop(hop traceroute.TracerouteHop) string {
+
+	 s := fmt.Sprintf("%v.%v.%v.%v", hop.Address[0], hop.Address[1], hop.Address[2], hop.Address[3])
+
+	return s
+}
+

@@ -275,8 +275,14 @@ function goTraceHost(traceHost) {
 		return;
 	}
 
-	printResult(traceHostValue);
+	params = "tracehost=" + traceHostValue;
 
+	makeAJAXCall('/trace', params);
+
+	console.log(document.getElementById("responseText").innerHTML);
+	traceResult = document.getElementById("responseText").innerHTML;
+
+	printResult("TRACE " + traceHostValue + " Result: <br>" + traceResult)
 }
 
 // disable the password field and show the public key
