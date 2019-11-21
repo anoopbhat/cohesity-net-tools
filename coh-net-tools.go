@@ -12,6 +12,7 @@ import (
 
     "github.com/sparrc/go-ping"
     "github.com/aeden/traceroute"
+    "github.com/beevik/ntp"
     "golang.org/x/crypto/ssh"
     
 )
@@ -198,12 +199,36 @@ func main() {
 
     }
 
+    // function to handle ntp
+    ntpFunc := func(w http.ResponseWriter, r *http.Request) {
+
+        if err := r.ParseForm(); err != nil {
+            log.Println(w, "ParseForm() err: %v", err)
+            return
+        }
+
+	ntpserver := r.FormValue("ntphost")
+
+	options := ntp.QueryOptions{ Timeout: 30*time.Second,}
+	response, err := ntp.QueryWithOptions(ntpserver, options)
+
+	if err != nil {
+	    io.WriteString(w, "Error: " + err.Error())
+	    return
+	}
+
+	message := formatResponse(response, ntpserver)
+
+	io.WriteString(w, message)
+    }
+
     // handlers for all the requests
     http.HandleFunc("/ping", pingFunc)
     http.HandleFunc("/port", portTestFunc)
     http.HandleFunc("/dns", DNSLookupFunc)
     http.HandleFunc("/ssh", sshFunc)
     http.HandleFunc("/trace", traceFunc)
+    http.HandleFunc("/ntpquery", ntpFunc)
 
 
     log.Println("Listening...")
@@ -302,4 +327,32 @@ func printHop(hop traceroute.TracerouteHop) string {
 	}
 
 	return line
+}
+
+func formatResponse(r *ntp.Response, host string) string {
+
+	message := fmt.Sprintf("[%s]  LocalTime: %v<br>", host, time.Now())
+	message += fmt.Sprintf("[%s]   XmitTime: %v<br>", host, r.Time)
+	message += fmt.Sprintf("[%s]    RefTime: %v<br>", host, r.ReferenceTime)
+	message += fmt.Sprintf("[%s]        RTT: %v<br>", host, r.RTT)
+	message += fmt.Sprintf("[%s]     Offset: %v<br>", host, r.ClockOffset)
+	message += fmt.Sprintf("[%s]       Poll: %v<br>", host, r.Poll)
+	message += fmt.Sprintf("[%s]  Precision: %v<br>", host, r.Precision)
+	message += fmt.Sprintf("[%s]    Stratum: %v<br>", host, r.Stratum)
+	message += fmt.Sprintf("[%s]      RefID: 0x%08x<br>", host, r.ReferenceID)
+	message += fmt.Sprintf("[%s]  RootDelay: %v<br>", host, r.RootDelay)
+	message += fmt.Sprintf("[%s]   RootDisp: %v<br>", host, r.RootDispersion)
+	message += fmt.Sprintf("[%s]   RootDist: %v<br>", host, r.RootDistance)
+	message += fmt.Sprintf("[%s]   MinError: %v<br>", host, r.MinError)
+	message += fmt.Sprintf("[%s]       Leap: %v<br>", host, r.Leap)
+	message += fmt.Sprintf("[%s]   KissCode: %v<br>", host, stringOrEmpty(r.KissCode))
+
+	return message
+}
+
+func stringOrEmpty(s string) string {
+	if s == "" {
+		return "<empty>"
+	}
+	return s
 }

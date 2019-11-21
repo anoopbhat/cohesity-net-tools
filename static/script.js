@@ -285,6 +285,30 @@ function goTraceHost(traceHost) {
 	printResult("TRACE " + traceHostValue + " Result: <br>" + traceResult)
 }
 
+function goNTPQuery(ntphost) {
+
+	ntpHostValue = document.getElementsByName(ntphost)[0].value.trim();
+
+	if ( ntpHostValue == "" ) {
+		printResult("Please provide an ntp server to query.");
+		return;
+	}
+
+	if ( ntpHostValue.indexOf(' ') >= 0 ) {
+		printResult("Spaces are not allowed for host.");
+		return;
+	}
+
+	params = "ntphost=" + ntpHostValue;
+
+	makeAJAXCall('/ntpquery', params);
+
+	console.log(document.getElementById("responseText").innerHTML);
+	ntpresult = document.getElementById("responseText").innerHTML;
+
+	printResult("NTP " + ntpHostValue + " Result: <br>" + ntpresult)
+}
+
 // disable the password field and show the public key
 function showPubKey() {
 
