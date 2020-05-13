@@ -78,7 +78,7 @@ function makeAJAXCall(endpoint, data) {
 	http.open('POST', url, false)
 
 	console.log("AJAX URL: " + url);
-	console.log("params: " + params)
+	//console.log("params: " + params)
 
 	
 	//Send the proper header information along with the request

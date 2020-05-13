@@ -114,8 +114,6 @@ func main() {
 	    return
 	}
 
-	log.Println(r)
-
 	host := r.FormValue("host")
 	user := r.FormValue("user")
 	pass := r.FormValue("password")
@@ -128,7 +126,7 @@ func main() {
 	    log.Println("Setting up SSH with Key Based Authenticaion")
 	    config = setupSSHConfigWithKey(user)
 	} else {
-	    log.Println("Segtting up SSH with password based authentication.")
+	    log.Println("Setting up SSH with password based authentication.")
 	    config = setupSSHConfigWithPass(user, pass)
 	}
 
